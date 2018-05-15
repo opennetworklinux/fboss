@@ -21,7 +21,7 @@ endif()
 # building on Linux under GCC right now, so we might as well just hard
 # code the flags.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++1y")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/include/libnl3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/include/libnl3 -I/usr/local/include/thrift")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -Wno-bool-compare")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Woverloaded-virtual -Wnon-virtual-dtor")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-maybe-uninitialized -Wdeprecated-declarations")
@@ -34,6 +34,7 @@ list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/external.install")
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_BUILD_DIR})
+include_directories(/usr/local/include)
 
 find_package(folly CONFIG REQUIRED)
 find_package(wangle CONFIG REQUIRED)
@@ -159,18 +160,19 @@ add_thrift_cpp2_library(
 )
 
 # System libraries
-find_library(USB usb-1.0)
+find_library(USB usb-1.0 PATHS /usr/lib/x86_64-linux-gnu)
 find_library(PCAP pcap)
 find_library(NETLINK3 nl-3)
 find_library(NETLINKROUTE3 nl-route-3)
 find_library(CURL curl)
 
-find_library(OPENNSL opennsl
-             PATHS ${CMAKE_SOURCE_DIR}/external/OpenNSL/bin/wedge-trident)
-find_library(IPROUTE2 netlink PATHS ${CMAKE_SOURCE_DIR}/external/iproute2/lib)
+find_library(OPENNSL opennsl PATHS $ENV{ONLF}/packages/base/amd64/OpenNSL/builds/OpenNSL/bin/wedge-trident)
+find_library(IPROUTE2 netlink PATHS $ENV{ONLF}/packages/base/amd64/iproute2/builds/iproute2/lib)
 
-include_directories(${CMAKE_SOURCE_DIR}/external/OpenNSL/include)
-include_directories(${CMAKE_SOURCE_DIR}/external/iproute2/include)
+include_directories($ENV{ONLF}/packages/base/amd64/OpenNSL/builds/OpenNSL/include)
+include_directories($ENV{ONLF}/packages/base/amd64/iproute2/builds/iproute2/include)
+include_directories(/usr/local/include/libnl3)
+include_directories(/usr/local/include)
 
 add_executable(wedge_agent
     fboss/agent/platforms/wedge/WedgePlatform.cpp
@@ -469,7 +471,7 @@ target_link_libraries(wedge_qsfp_util fboss_agent)
 add_definitions (-DIS_OSS=true)
 find_package(Threads REQUIRED)
 enable_testing()
-set(GTEST_DIR "external/googletest")
+set(GTEST_DIR $ENV{ONLF}/packages/base/amd64/googletest/builds/googletest)
 include_directories(${GTEST_DIR}/googletest/include ${GTEST_DIR}/googlemock/include)
 add_subdirectory(${GTEST_DIR} ${GTEST_DIR}.build)
 
